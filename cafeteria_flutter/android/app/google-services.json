@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "611120973905",
+    "project_id": "cafeteria-app-tese",
+    "storage_bucket": "cafeteria-app-tese.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:611120973905:android:7ec48caba9d466322f1070",
+        "android_client_info": {
+          "package_name": "com.example.cafeteria_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB1AqjIGT9ByoYfsJDKLEZTKrQuL_xg_4Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
