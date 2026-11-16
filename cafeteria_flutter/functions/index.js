@@ -1,4 +1,5 @@
 const { onDocumentCreated, onDocumentUpdated } = require('firebase-functions/v2/firestore');
+const { onCall, HttpsError } = require('firebase-functions/v2/https'); // Cargamos los módulos para la función ejecutable
 const admin = require('firebase-admin');
 admin.initializeApp();
 const db = admin.firestore();
@@ -58,5 +59,33 @@ exports.alCambiarEstado = onDocumentUpdated('orders/{id}', async (event) => {
   const token = u.exists && u.data().fcmToken;
   if (token) {
     await admin.messaging().send({ token, notification: { title: msg[0], body: msg[1] } }).catch(() => {});
+  }
+});
+
+// NUEVA FUNCIÓN: Convierte a cualquier usuario en Superusuario usando su correo electrónico
+exports.hacerAdmin = onCall(async (request) => {
+  // Asegura que quien llama a la función haya iniciado sesión en la app
+  if (!request.auth) {
+    throw new HttpsError('unauthenticated', 'Debes iniciar sesión para ejecutar esta acción.');
+  }
+
+  const emailDestino = request.data.email;
+  if (!emailDestino) {
+    throw new HttpsError('invalid-argument', 'Debes proporcionar un correo electrónico.');
+  }
+
+  try {
+    // Busca al usuario en Firebase Authentication mediante su correo electrónico
+    const user = await admin.auth().getUserByEmail(emailDestino);
+    
+    // Asigna el rol oculto de superusuario (Custom Claim)
+    await admin.auth().setCustomUserClaims(user.uid, { admin: true });
+
+    // Registra visualmente el rol en la base de datos de Firestore
+    await db.doc(`users/${user.uid}`).set({ role: 'admin' }, { merge: true });
+
+    return { success: true, message: `El usuario ${emailDestino} ahora es Superusuario.` };
+  } catch (error) {
+    throw new HttpsError('internal', error.message || 'No se pudo asignar el rol.');
   }
 });
